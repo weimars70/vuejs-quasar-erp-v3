@@ -19,32 +19,20 @@
           <q-card-section>
             <q-form @submit="saveColor" class="q-gutter-md">
               <q-input 
-                v-model="formData.code" 
-                :label="t('colors.code')"
+                v-model="formData.codigo" 
+                :label="t('Codigo')"
                 outlined
                 dense
                 readonly
               />
               <q-input 
-                v-model="formData.name" 
-                :label="t('colors.name')"
+                v-model="formData.nombre" 
+                :label="t('Nombre')"
                 :rules="[val => !!val || t('validation.required')]"
                 outlined
                 dense
               />
-              <q-color
-                v-model="formData.hex"
-                :label="t('colors.colorPicker')"
-                default-view="palette"
-                class="full-width"
-              />
-              <div class="row items-center q-gutter-sm">
-                <div 
-                  class="color-preview" 
-                  :style="{ backgroundColor: formData.hex }"
-                ></div>
-                <div class="text-caption">{{ formData.hex }}</div>
-              </div>
+            
               <div class="row justify-end q-mt-md">
                 <q-btn 
                   :label="t('common.cancel')"
@@ -69,10 +57,9 @@
 
       <q-table
         ref="table"
-        :title="t('colors.title')"
         :rows="filteredColors"
         :columns="columns"
-        row-key="id"
+        row-key="codigo"
         :loading="loading"
         :dense="dense"
         :filter="filter"
@@ -139,7 +126,7 @@ const { t } = useI18n();
 
 const table = ref(null);
 const colors = ref<any[]>([]);
-const formData = ref({ id: null, code: '', name: '', hex: '#000000' });
+const formData = ref({ id: null, codigo: '', nombre: '', hex: '#000000' });
 const loading = ref(false);
 const saving = ref(false);
 const showForm = ref(false);
@@ -148,7 +135,7 @@ const filter = ref('');
 const editMode = ref(false);
 
 const initialPagination = {
-  sortBy: 'code',
+  sortBy: 'codigo',
   descending: false,
   page: 1,
   rowsPerPage: 10
@@ -156,25 +143,18 @@ const initialPagination = {
 
 const columns = computed(() => [
   { 
-    name: 'code', 
-    label: t('colors.code'), 
-    field: 'code', 
+    name: 'codigo', 
+    label: t('Codigo'), 
+    field: 'codigo', 
     sortable: true, 
     align: 'left' 
   },
   { 
-    name: 'name', 
-    label: t('colors.name'), 
-    field: 'name', 
+    name: 'nombre', 
+    label: t('Nombre'), 
+    field: 'nombre', 
     sortable: true, 
     align: 'left' 
-  },
-  {
-    name: 'hex',
-    label: t('colors.color'),
-    field: 'hex',
-    sortable: false,
-    align: 'left'
   },
   { 
     name: 'actions', 
@@ -189,16 +169,13 @@ const filteredColors = computed(() => {
   if (!filter.value) return colors.value;
   const searchTerm = filter.value.toLowerCase();
   return colors.value.filter(color => 
-    color?.code?.toLowerCase().includes(searchTerm) ||
-    color?.name?.toLowerCase().includes(searchTerm) ||
-    color?.hex?.toLowerCase().includes(searchTerm)
-  );
+    color?.nombre?.toLowerCase().includes(searchTerm));
 });
 
 async function loadColors() {
   try {
     loading.value = true;
-    const response = await api.get('/colors');
+    const response = await api.get('/colores');
     colors.value = response.data || [];
   } catch (error: any) {
     colors.value = [];
@@ -206,7 +183,7 @@ async function loadColors() {
       color: 'negative',
       message: t('colors.loadError') + ': ' + error.message,
       icon: 'error',
-      position: 'top'
+      position: 'center'
     });
   } finally {
     loading.value = false;
@@ -215,7 +192,7 @@ async function loadColors() {
 
 function openForm() {
   editMode.value = false;
-  formData.value = { id: null, code: '', name: '', hex: '#000000' };
+  formData.value = { codigo: '', nombre: ''};
   showForm.value = true;
 }
 
@@ -223,9 +200,9 @@ async function saveColor() {
   try {
     saving.value = true;
     if (editMode.value) {
-      await api.put(`/colors/${formData.value.id}`, formData.value);
+      await api.put(`/colores/${formData.value.codigo}`, formData.value);
     } else {
-      await api.post('/colors', formData.value);
+      await api.post('/colores', formData.value);
     }
     await loadColors();
     showForm.value = false;
@@ -233,14 +210,14 @@ async function saveColor() {
       color: 'positive',
       message: t('colors.saveSuccess'),
       icon: 'check',
-      position: 'top'
+      position: 'center'
     });
   } catch (error: any) {
     $q.notify({
       color: 'negative',
       message: t('colors.saveError') + ': ' + error.message,
       icon: 'error',
-      position: 'top'
+      position: 'center'
     });
   } finally {
     saving.value = false;
@@ -267,14 +244,14 @@ function confirmDelete(row: any) {
         color: 'positive',
         message: t('colors.deleteSuccess'),
         icon: 'check',
-        position: 'top'
+        position: 'center'
       });
     } catch (error: any) {
       $q.notify({
         color: 'negative',
         message: t('colors.deleteError') + ': ' + error.message,
         icon: 'error',
-        position: 'top'
+        position: 'center'
       });
     }
   });
@@ -290,15 +267,15 @@ function exportTable() {
       message: t('common.noDataToExport'),
       color: 'warning',
       icon: 'warning',
-      position: 'top'
+      position: 'center'
     });
     return;
   }
 
-  const content = colors.value.map(row => `${row.code},${row.name},${row.hex}`).join('\n');
+  const content = colors.value.map(row => `${row.codigo},${row.nombre}`).join('\n');
   const status = exportFile(
     'colores.xlsx',
-    `${t('colors.code')},${t('colors.name')},${t('colors.color')}\n${content}`,
+    `${t('colors.codigo')},${t('colors.nombre')},\n${content}`,
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
   );
 
@@ -307,7 +284,7 @@ function exportTable() {
       message: t('common.exportError'),
       color: 'negative',
       icon: 'warning',
-      position: 'top'
+      position: 'center'
     });
   }
 }

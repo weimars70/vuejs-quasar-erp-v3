@@ -19,14 +19,14 @@
           <q-card-section>
             <q-form @submit="saveSize" class="q-gutter-md">
               <q-input 
-                v-model="formData.code" 
+                v-model="formData.codigo" 
                 label="Código" 
+                :rules="[val => !!val || 'El código es requerido']"
                 outlined
                 dense
-                readonly
               />
               <q-input 
-                v-model="formData.name" 
+                v-model="formData.nombre" 
                 label="Nombre" 
                 :rules="[val => !!val || 'El nombre es requerido']"
                 outlined
@@ -56,10 +56,9 @@
 
       <q-table
         ref="table"
-        title="Tallas"
         :rows="filteredSizes"
         :columns="columns"
-        row-key="id"
+        row-key="codigo"
         :loading="loading"
         :dense="dense"
         :filter="filter"
@@ -111,7 +110,7 @@ import { exportFile } from 'quasar';
 const $q = useQuasar();
 const table = ref(null);
 const sizes = ref<any[]>([]);
-const formData = ref({ id: null, code: '', name: '' });
+const formData = ref({ codigo: '', nombre: '' });
 const loading = ref(false);
 const saving = ref(false);
 const showForm = ref(false);
@@ -120,7 +119,7 @@ const filter = ref('');
 const editMode = ref(false);
 
 const initialPagination = {
-  sortBy: 'code',
+  sortBy: 'codigo',
   descending: false,
   page: 1,
   rowsPerPage: 10
@@ -128,16 +127,16 @@ const initialPagination = {
 
 const columns = [
   { 
-    name: 'code', 
+    name: 'codigo', 
     label: 'Código', 
-    field: 'code', 
+    field: 'codigo', 
     sortable: true, 
     align: 'left' 
   },
   { 
-    name: 'name', 
+    name: 'nombre', 
     label: 'Nombre', 
-    field: 'name', 
+    field: 'nombre', 
     sortable: true, 
     align: 'left' 
   },
@@ -154,15 +153,14 @@ const filteredSizes = computed(() => {
   if (!filter.value) return sizes.value;
   const searchTerm = filter.value.toLowerCase();
   return sizes.value.filter(size => 
-    size?.code?.toLowerCase().includes(searchTerm) ||
-    size?.name?.toLowerCase().includes(searchTerm)
+    size?.nombre?.toLowerCase().includes(searchTerm)
   );
 });
 
 async function loadSizes() {
   try {
     loading.value = true;
-    const response = await api.get('/sizes');
+    const response = await api.get('/tallas');
     sizes.value = response.data || [];
   } catch (error: any) {
     sizes.value = [];
@@ -170,7 +168,7 @@ async function loadSizes() {
       color: 'negative',
       message: `Error al cargar las tallas: ${error.message}`,
       icon: 'error',
-      position: 'top'
+      position: 'center'
     });
   } finally {
     loading.value = false;
@@ -179,7 +177,7 @@ async function loadSizes() {
 
 function openForm() {
   editMode.value = false;
-  formData.value = { id: null, code: '', name: '' };
+  formData.value = { codigo: '', nombre: '' };
   showForm.value = true;
 }
 
@@ -187,9 +185,9 @@ async function saveSize() {
   try {
     saving.value = true;
     if (editMode.value) {
-      await api.put(`/sizes/${formData.value.id}`, formData.value);
+      await api.put(`/tallas/${formData.value.codigo}`, formData.value);
     } else {
-      await api.post('/sizes', formData.value);
+      await api.post('/tallas', formData.value);
     }
     await loadSizes();
     showForm.value = false;
@@ -197,14 +195,14 @@ async function saveSize() {
       color: 'positive',
       message: 'Talla guardada exitosamente',
       icon: 'check',
-      position: 'top'
+      position: 'center'
     });
   } catch (error: any) {
     $q.notify({
       color: 'negative',
       message: `Error al guardar la talla: ${error.message}`,
       icon: 'error',
-      position: 'top'
+      position: 'center'
     });
   } finally {
     saving.value = false;
@@ -225,20 +223,20 @@ function confirmDelete(row: any) {
     persistent: true
   }).onOk(async () => {
     try {
-      await api.delete(`/sizes/${row.id}`);
+      await api.delete(`/sizes/${row.codigo}`);
       await loadSizes();
       $q.notify({
         color: 'positive',
         message: 'Talla eliminada exitosamente',
         icon: 'check',
-        position: 'top'
+        position: 'center'
       });
     } catch (error: any) {
       $q.notify({
         color: 'negative',
         message: `Error al eliminar la talla: ${error.message}`,
         icon: 'error',
-        position: 'top'
+        position: 'center'
       });
     }
   });
@@ -254,12 +252,12 @@ function exportTable() {
       message: 'No hay datos para exportar',
       color: 'warning',
       icon: 'warning',
-      position: 'top'
+      position: 'center'
     });
     return;
   }
 
-  const content = sizes.value.map(row => `${row.code},${row.name}`).join('\n');
+  const content = sizes.value.map(row => `${row.codigo},${row.nombre}`).join('\n');
   const status = exportFile(
     'tallas.xlsx',
     `Código,Nombre\n${content}`,
@@ -271,7 +269,7 @@ function exportTable() {
       message: 'El navegador denegó la descarga del archivo',
       color: 'negative',
       icon: 'warning',
-      position: 'top'
+      position: 'center'
     });
   }
 }

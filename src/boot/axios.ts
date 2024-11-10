@@ -9,7 +9,7 @@ declare module '@vue/runtime-core' {
 }
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: 'http://108.181.193.178:3000/erp',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json'

@@ -60,7 +60,7 @@
         title="Roles"
         :rows="filteredRoles"
         :columns="columns"
-        row-key="id"
+        row-key="codigo"
         :loading="loading"
         :dense="dense"
         :filter="filter"
@@ -104,7 +104,7 @@ import TableToolbar from 'components/TableToolbar.vue';
 const $q = useQuasar();
 
 const roles = ref<any[]>([]);
-const formData = ref({ id: null, code: '', name: '' });
+const formData = ref({ codigo: '', nombre: '' });
 const loading = ref(false);
 const saving = ref(false);
 const showForm = ref(false);
@@ -113,7 +113,7 @@ const filter = ref('');
 const editMode = ref(false);
 
 const initialPagination = {
-  sortBy: 'code',
+  sortBy: 'codigo',
   descending: false,
   page: 1,
   rowsPerPage: 10
@@ -121,16 +121,16 @@ const initialPagination = {
 
 const columns = [
   { 
-    name: 'code', 
+    name: 'codigo', 
     label: 'Código', 
-    field: 'code', 
+    field: 'codigo', 
     sortable: true, 
     align: 'left' 
   },
   { 
-    name: 'name', 
+    name: 'nombre', 
     label: 'Nombre', 
-    field: 'name', 
+    field: 'nombre', 
     sortable: true, 
     align: 'left' 
   },
@@ -147,14 +147,13 @@ const filteredRoles = computed(() => {
   if (!filter.value) return roles.value;
   const searchTerm = filter.value.toLowerCase();
   return roles.value.filter(role => 
-    role?.code?.toLowerCase().includes(searchTerm) ||
-    role?.name?.toLowerCase().includes(searchTerm)
+    role?.nombre?.toLowerCase().includes(searchTerm)
   );
 });
 
 function openForm() {
   editMode.value = false;
-  formData.value = { id: null, code: '', name: '' };
+  formData.value = { codigo: '', nombre: '' };
   showForm.value = true;
 }
 
@@ -172,7 +171,7 @@ function confirmDelete(row: any) {
     persistent: true
   }).onOk(async () => {
     try {
-      const index = roles.value.findIndex(r => r.id === row.id);
+      const index = roles.value.findIndex(r => r.codigo === row.codigo);
       if (index > -1) {
         roles.value.splice(index, 1);
       }
@@ -195,7 +194,7 @@ async function saveRole() {
   try {
     saving.value = true;
     if (editMode.value) {
-      const index = roles.value.findIndex(r => r.id === formData.value.id);
+      const index = roles.value.findIndex(r => r.codigo === formData.value.codigo);
       if (index > -1) {
         roles.value[index] = { ...formData.value };
       }
@@ -236,7 +235,7 @@ function exportTable() {
     return;
   }
 
-  const content = roles.value.map(row => `${row.code},${row.name}`).join('\n');
+  const content = roles.value.map(row => `${row.codigo},${row.nombre}`).join('\n');
   const status = $q.exportFile(
     'roles.csv',
     `Código,Nombre\n${content}`,

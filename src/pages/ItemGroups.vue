@@ -19,14 +19,14 @@
           <q-card-section>
             <q-form @submit="saveItemGroup" class="q-gutter-md">
               <q-input 
-                v-model="formData.code" 
+                v-model="formData.codigo" 
                 label="Código" 
                 outlined
                 dense
                 readonly
               />
               <q-input 
-                v-model="formData.name" 
+                v-model="formData.nombre" 
                 label="Nombre" 
                 :rules="[val => !!val || 'El nombre es requerido']"
                 outlined
@@ -56,10 +56,9 @@
 
       <q-table
         ref="table"
-        title="Grupos de Artículos"
         :rows="filteredGroups"
         :columns="columns"
-        row-key="id"
+        row-key="codigo"
         :loading="loading"
         :dense="dense"
         :filter="filter"
@@ -111,7 +110,7 @@ import { exportFile } from 'quasar';
 const $q = useQuasar();
 const table = ref(null);
 const itemGroups = ref<any[]>([]);
-const formData = ref({ id: null, code: '', name: '' });
+const formData = ref({ codigo: '', nombre: '' });
 const loading = ref(false);
 const saving = ref(false);
 const showForm = ref(false);
@@ -120,7 +119,7 @@ const filter = ref('');
 const editMode = ref(false);
 
 const initialPagination = {
-  sortBy: 'code',
+  sortBy: 'codigo',
   descending: false,
   page: 1,
   rowsPerPage: 10
@@ -128,16 +127,16 @@ const initialPagination = {
 
 const columns = [
   { 
-    name: 'code', 
+    name: 'codigo', 
     label: 'Código', 
-    field: 'code', 
+    field: 'codigo', 
     sortable: true, 
     align: 'left' 
   },
   { 
-    name: 'name', 
+    name: 'nombre', 
     label: 'Nombre', 
-    field: 'name', 
+    field: 'nombre', 
     sortable: true, 
     align: 'left' 
   },
@@ -154,7 +153,6 @@ const filteredGroups = computed(() => {
   if (!filter.value) return itemGroups.value;
   const searchTerm = filter.value.toLowerCase();
   return itemGroups.value.filter(group => 
-    group?.code?.toLowerCase().includes(searchTerm) ||
     group?.name?.toLowerCase().includes(searchTerm)
   );
 });
@@ -162,7 +160,7 @@ const filteredGroups = computed(() => {
 async function loadItemGroups() {
   try {
     loading.value = true;
-    const response = await api.get('/item-groups');
+    const response = await api.get('/items-grupos');
     itemGroups.value = response.data || [];
   } catch (error: any) {
     itemGroups.value = [];
@@ -170,7 +168,7 @@ async function loadItemGroups() {
       color: 'negative',
       message: `Error al cargar los grupos: ${error.message}`,
       icon: 'error',
-      position: 'top'
+      position: 'center'
     });
   } finally {
     loading.value = false;
@@ -179,7 +177,7 @@ async function loadItemGroups() {
 
 function openForm() {
   editMode.value = false;
-  formData.value = { id: null, code: '', name: '' };
+  formData.value = { codigo: '', nombre: '' };
   showForm.value = true;
 }
 
@@ -187,9 +185,9 @@ async function saveItemGroup() {
   try {
     saving.value = true;
     if (editMode.value) {
-      await api.put(`/item-groups/${formData.value.id}`, formData.value);
+      await api.put(`/items-grupos/${formData.value.codigo}`, formData.value);
     } else {
-      await api.post('/item-groups', formData.value);
+      await api.post('/items-grupos', formData.value);
     }
     await loadItemGroups();
     showForm.value = false;
@@ -197,14 +195,14 @@ async function saveItemGroup() {
       color: 'positive',
       message: 'Grupo guardado exitosamente',
       icon: 'check',
-      position: 'top'
+      position: 'center'
     });
   } catch (error: any) {
     $q.notify({
       color: 'negative',
       message: `Error al guardar el grupo: ${error.message}`,
       icon: 'error',
-      position: 'top'
+      position: 'center'
     });
   } finally {
     saving.value = false;
@@ -225,20 +223,20 @@ function confirmDelete(row: any) {
     persistent: true
   }).onOk(async () => {
     try {
-      await api.delete(`/item-groups/${row.id}`);
+      await api.delete(`/items-groups/${row.codigo}`);
       await loadItemGroups();
       $q.notify({
         color: 'positive',
         message: 'Grupo eliminado exitosamente',
         icon: 'check',
-        position: 'top'
+        position: 'center'
       });
     } catch (error: any) {
       $q.notify({
         color: 'negative',
         message: `Error al eliminar el grupo: ${error.message}`,
         icon: 'error',
-        position: 'top'
+        position: 'center'
       });
     }
   });
@@ -254,12 +252,12 @@ function exportTable() {
       message: 'No hay datos para exportar',
       color: 'warning',
       icon: 'warning',
-      position: 'top'
+      position: 'center'
     });
     return;
   }
 
-  const content = itemGroups.value.map(row => `${row.code},${row.name}`).join('\n');
+  const content = itemGroups.value.map(row => `${row.codigo},${row.nombre}`).join('\n');
   const status = exportFile(
     'grupos.xlsx',
     `Código,Nombre\n${content}`,
@@ -271,7 +269,7 @@ function exportTable() {
       message: 'El navegador denegó la descarga del archivo',
       color: 'negative',
       icon: 'warning',
-      position: 'top'
+      position: 'center'
     });
   }
 }

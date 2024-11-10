@@ -8,14 +8,14 @@
             <div class="text-h6">Roles</div>
             <q-form @submit="saveRole" class="q-gutter-md q-mt-md">
               <q-input 
-                v-model="roleForm.code" 
+                v-model="roleForm.codigo" 
                 label="Código" 
                 outlined 
                 dense
                 :rules="[val => !!val || 'Código es requerido']"
               />
               <q-input 
-                v-model="roleForm.name" 
+                v-model="roleForm.nombre" 
                 label="Nombre" 
                 outlined 
                 dense
@@ -36,7 +36,7 @@
             <q-table
               :rows="roles"
               :columns="columns"
-              row-key="id"
+              row-key="codigo"
               dense
               :pagination="{ rowsPerPage: 10 }"
             >
@@ -95,7 +95,7 @@
 
             <q-tree
               :nodes="menuTree"
-              node-key="id"
+              node-key="codigo"
               default-expand-all
             >
               <template v-slot:default-header="prop">
@@ -236,12 +236,12 @@ const $q = useQuasar();
 
 // Roles Management
 const roles = ref([]);
-const roleForm = ref({ id: null, code: '', name: '' });
+const roleForm = ref({ codigo: '', nombre: '' });
 const saving = ref(false);
 
 const columns = [
-  { name: 'code', label: 'Código', field: 'code', sortable: true },
-  { name: 'name', label: 'Nombre', field: 'name', sortable: true },
+  { name: 'codigo', label: 'Código', field: 'codigo', sortable: true },
+  { name: 'nombre', label: 'Nombre', field: 'nombre', sortable: true },
   { name: 'actions', label: 'Acciones', field: 'actions', align: 'center' }
 ];
 

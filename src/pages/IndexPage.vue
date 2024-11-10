@@ -61,7 +61,7 @@ const menuItems = [
   },
   { 
     path: '/roles', 
-    label: 'Roles Usuarios', 
+    label: 'Roles', 
     icon: 'admin_panel_settings',
     description: 'Gestión de roles y permisos'
   }

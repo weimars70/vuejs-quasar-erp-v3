@@ -43,9 +43,9 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../pages/Roles.vue')
       },
       {
-        path: 'menu',
-        name: 'menu',
-        component: () => import('../pages/security/MenuPage.vue')
+        path: 'permisos',
+        name: 'permisos',
+        component: () => import('../pages/Permisos.vue')
       }
     ]
   },

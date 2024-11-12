@@ -108,26 +108,25 @@
       <q-scroll-area class="fit">
         <q-list padding>
           <q-item-label header class="text-weight-bold" :class="`text-${currentTheme.primary}`">
-            MENÚ
+            MENÚ xxx
           </q-item-label>
 
-          <q-tree
-            :nodes="menuItems"
-            node-key="path"
-            default-expand-all
-            no-connectors
-            @click.native.stop
+          <q-item
+            v-for="item in menuItems"
+            :key="item.path"
+            clickable
+            v-ripple
+            @click="openTab(item)"
+            :active="currentTab === item.path"
+            :class="{ 'custom-active-item': currentTab === item.path }"
           >
-            <template v-slot:default-header="prop">
-              <div 
-                class="row items-center full-width cursor-pointer"
-                @click="openInTab(prop.node)"
-              >
-                <q-icon :name="prop.node.icon" size="24px" class="q-mr-sm" />
-                <div class="text-weight-medium">{{ prop.node.label }}</div>
-              </div>
-            </template>
-          </q-tree>
+            <q-item-section avatar>
+              <q-icon :name="item.icon" />
+            </q-item-section>
+            <q-item-section>
+              {{ item.label }}
+            </q-item-section>
+          </q-item>
         </q-list>
       </q-scroll-area>
     </q-drawer>
@@ -191,16 +190,12 @@ import { useRouter, useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useAuthStore } from '../stores/auth';
 import { menuService } from 'src/services/menuServices';
-import { MenuNode } from 'src/types/menu';
-import { useTabStore } from 'src/stores/tab';
-
-let menuItems = ref<MenuNode[]>([])
+import { api } from 'src/boot/axios';
 
 const $q = useQuasar();
 const router = useRouter();
 const route = useRoute();
 const auth = useAuthStore();
-const tabStore = useTabStore();
 
 const leftDrawerOpen = ref(false);
 const currentTab = ref('/');
@@ -238,9 +233,10 @@ const isDark = computed({
   set: (value) => $q.dark.set(value)
 });
 
-
-
-/*const menuItems = [
+/*const response = await api.get('/plantilla');
+const menuItems =  response.data[0].permisos;
+console.log('menuItems: ', menuItems);*/
+const menuItems = [
   { path: '/', label: 'Inicio', icon: 'home' },
   { path: '/colors', label: 'Colores', icon: 'palette' },
   { path: '/sizes', label: 'Tallas', icon: 'straighten' },
@@ -248,8 +244,9 @@ const isDark = computed({
   { path: '/purchases', label: 'Compras', icon: 'shopping_cart' },
   { path: '/roles', label: 'Roles', icon: 'admin_panel_settings' },
   { path: '/permisos', label: 'Permisos', icon: 'admin_panel_settings' }
-];*/
+];
 
+[{"path":"/inicio","label":"Inicio","icon":"home","children":[]},{"path":"/colors","label":"Colores","icon":"palette","children":[]},{"path":"/sizes","label":"Tallas","icon":"straighten","children":[]},{"path":"/item-groups","label":"Grupos","icon":"category","children":[]},{"path":"/purchases","label":"Compras","icon":"shopping_cart","children":[{"path":"/nueva-compra","label":"Nueva Compra","icon":"shopping_cart","children":[]}]},{"path":"/roles","label":"Roles","icon":"admin_panel_settings","children":[{"path":"/nuevo-rol","label":"Nuevo Rol","icon":"account_circle","children":[]}]},{"path":"/permisos","label":"Permisos","icon":"admin_panel_settings","children":[]}]
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -302,20 +299,21 @@ function closeAllTabs() {
   router.push('/');
 }
 
-const openInTab = (node: MenuNode) => {
-  if (node.path) {
-    openTab(node);
-  } 
-}
+watch(route, (newRoute) => {
+  const path = newRoute.path;
+  const menuItem = menuItems.find(item => item.path === path);
+  if (menuItem && !openTabs.value.find(tab => tab.path === path)) {
+    openTab(menuItem);
+  }
+  currentTab.value = path;
+});
 
-  onMounted(async () => {
-    menuItems.value = await menuService.getMenuItems();
-    setTheme(themes[0]);
-    if (!auth.isAuthenticated) {
-      router.push('/login');
-    }
-  });
-
+onMounted(() => {
+  setTheme(themes[0]);
+  if (!auth.isAuthenticated) {
+    router.push('/login');
+  }
+});
 </script>
 
 <style lang="scss" scoped>

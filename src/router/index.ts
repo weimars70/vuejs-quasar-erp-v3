@@ -1,6 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import routes from './routes';
 import { useTabStore } from '../stores/tab';
+import { ref } from 'vue';
+
+const openTabs = ref([
+  { path: '/', label: 'INICIO', icon: 'home' }
+]);
+const currentTab = ref('/');
 
 const router = createRouter({
   history: createWebHistory(),
@@ -12,14 +18,20 @@ router.beforeEach((to, from, next) => {
   
   // If route exists and it's not already in tabs, add it
   if (to.name && to.path !== from.path) {
-    const matchedRoute = routes[0].children?.find(route => route.path === to.path);
-    if (matchedRoute) {
+
+            
+    /*let rutapath = to.path.substring(1);
+    
+    const matchedRoute = routes[1].children?.find(route => route.path === rutapath);
+    
+    if (!matchedRoute) {
+      console.log('matchedRoute:  ', to.path);
       tabStore.addTab({
-        path: to.path,
-        label: matchedRoute.name?.toString().toUpperCase() || '',
-        icon: getIconForRoute(to.path)
+        path: rutapath,
+        label: to.path?.toString().toUpperCase() || '',
+        icon: getIconForRoute(rutapath)
       });
-    }
+    }*/
   }
   
   next();
@@ -32,10 +44,14 @@ function getIconForRoute(path: string): string {
     '/sizes': 'straighten',
     '/item-groups': 'category',
     '/purchases': 'shopping_cart',
-    '/roles': 'admin_panel_settings'
+    '/roles': 'admin_panel_settings',
+    '/permisos': 'shopping_cart',
   };
   
   return icons[path] || 'help';
 }
 
 export default router;
+
+
+

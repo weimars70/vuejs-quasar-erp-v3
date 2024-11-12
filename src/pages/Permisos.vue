@@ -147,14 +147,18 @@ const saveChanges = async () => {
   try {
     await menuService.saveMenuItems(menuItems.value)
     $q.notify({
-      message: 'Cambios guardados exitosamente',
-      color: 'positive'
-    })
+      color: 'positive',
+      message: 'Talla guardada exitosamente',
+      icon: 'check',
+      position: 'center'
+    });
   } catch (error) {
     $q.notify({
-      message: 'Error al guardar los cambios',
-      color: 'negative'
-    })
+      color: 'negative',
+      message: `Error al guardar la talla: ${error.message}`,
+      icon: 'error',
+      position: 'center'
+    });
   }
 }
 

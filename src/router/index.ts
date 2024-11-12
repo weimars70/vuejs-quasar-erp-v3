@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router';
 import routes from './routes';
 import { useTabStore } from '../stores/tab';
 import { ref } from 'vue';
@@ -9,9 +9,12 @@ const openTabs = ref([
 const currentTab = ref('/');
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createMemoryHistory(),
   routes
 });
+
+
+
 
 router.beforeEach((to, from, next) => {
   const tabStore = useTabStore();

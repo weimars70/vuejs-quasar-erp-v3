@@ -50,7 +50,7 @@ const loadUsers = async () => {
     $q.notify({
       type: 'negative',
       message: 'Error al cargar usuarios',
-      position: 'top'
+      position: 'center'
     });
   } finally {
     loading.value = false;
@@ -81,7 +81,7 @@ const saveUser = async (formData: Partial<User>) => {
     $q.notify({
       type: 'positive',
       message: `Usuario ${editingUser.value ? 'actualizado' : 'creado'} exitosamente`,
-      position: 'top'
+      position: 'center'
     });
 
     showCreateDialog.value = false;
@@ -93,7 +93,7 @@ const saveUser = async (formData: Partial<User>) => {
     $q.notify({
       type: 'negative',
       message: `Error al ${editingUser.value ? 'actualizar' : 'crear'} usuario`,
-      position: 'top'
+      position: 'center'
     });
   } finally {
     saving.value = false;

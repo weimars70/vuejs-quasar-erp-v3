@@ -28,7 +28,10 @@ export function useTreeLogic() {
     try {
       const response = await menuRepository.getMenuItems();
       console.log('Raw tree data:', response);
-      treeData.value = processNodes(response);
+      
+      const parsedData = typeof response === 'string' ? JSON.parse(response) : response;
+      treeData.value = processNodes(parsedData);
+      
       console.log('Processed tree data:', treeData.value);
       
       expandAllNodes(treeData.value);
@@ -38,7 +41,7 @@ export function useTreeLogic() {
       $q.notify({ 
         type: 'negative', 
         message: 'Error al cargar datos del árbol',
-        position: 'top'
+        position: 'center'
       });
     }
   };
@@ -50,6 +53,17 @@ export function useTreeLogic() {
         expandAllNodes(node.children);
       }
     });
+  };
+
+  const getAllPaths = (nodes: TreeNode[]): string[] => {
+    let paths: string[] = [];
+    nodes.forEach(node => {
+      paths.push(node.path);
+      if (node.children && node.children.length > 0) {
+        paths = paths.concat(getAllPaths(node.children));
+      }
+    });
+    return paths;
   };
 
   const getAllDescendantPaths = (node: TreeNode): string[] => {
@@ -116,11 +130,13 @@ export function useTreeLogic() {
         const wasUnchecked = !currentSelection.has(changedPath);
         
         if (wasUnchecked) {
+          // When unchecking, remove the node and all its descendants
           const descendantPaths = getAllDescendantPaths(node);
           selectedItems.value = selectedItems.value.filter(path => 
             !descendantPaths.includes(path) && path !== changedPath
           );
         } else {
+          // When checking, add all parent nodes
           const parentPaths = getAllParentPaths(treeData.value, changedPath);
           const newSelection = new Set([
             ...ticked,
@@ -141,7 +157,7 @@ export function useTreeLogic() {
       $q.notify({
         type: 'negative',
         message: 'Error al cargar roles',
-        position: 'top'
+        position: 'center'
       });
     } finally {
       loadingRoles.value = false;
@@ -151,28 +167,39 @@ export function useTreeLogic() {
   const onRoleChange = async (roleId: number) => {
     if (!roleId) return;
     try {
-      const response = await menuRepository.getMenuRol(roleId);
-      selectedItems.value = extractPaths(response);
+      // Get the role permissions
+      const rolePermissions = await menuRepository.getMenuRol(roleId);
+      console.log('Role permissions:', rolePermissions);
+
+      // If permissions are empty or null, only check the "/inicio" node
+      if (!rolePermissions || (Array.isArray(rolePermissions) && rolePermissions.length === 0)) {
+        console.log('No permissions found, setting default permissions');
+        selectedItems.value = ['/'];
+        return;
+      }
+
+      // Parse the permissions if it's a string
+      const parsedPermissions = typeof rolePermissions === 'string' 
+        ? JSON.parse(rolePermissions) 
+        : rolePermissions;
+
+      // Get all paths from the permissions tree
+      const permissionPaths = getAllPaths(parsedPermissions);
+      console.log('Permission paths:', permissionPaths);
+
+      // Update selected items
+      selectedItems.value = permissionPaths;
+
     } catch (error) {
       console.error('Error loading role menu:', error);
       $q.notify({
         type: 'negative',
         message: 'Error al cargar menú del rol',
-        position: 'top'
+        position: 'center'
       });
+      // Set default permission on error
+      selectedItems.value = ['/'];
     }
-  };
-
-  const extractPaths = (nodes: TreeNode[]): string[] => {
-    const paths: string[] = [];
-    const traverse = (node: TreeNode) => {
-      paths.push(node.path);
-      if (node.children) {
-        node.children.forEach(traverse);
-      }
-    };
-    nodes.forEach(traverse);
-    return paths;
   };
 
   const getSelectedNodesData = (): TreeNode[] => {
@@ -220,7 +247,7 @@ export function useTreeLogic() {
       $q.notify({
         type: 'warning',
         message: 'Por favor seleccione un rol',
-        position: 'top'
+        position: 'center'
       });
       return;
     }
@@ -233,14 +260,14 @@ export function useTreeLogic() {
       $q.notify({
         type: 'positive',
         message: 'Selección guardada exitosamente',
-        position: 'top'
+        position: 'center'
       });
     } catch (error) {
       console.error('Error saving selection:', error);
       $q.notify({
         type: 'negative',
         message: 'Error al guardar la selección',
-        position: 'top'
+        position: 'center'
       });
     } finally {
       saving.value = false;

@@ -3,5 +3,5 @@
 </template>
 
 <script setup>
-import MenuComparisonTree from 'components/MenuComparisonTree.vue'
+import MenuComparisonTree from '../features/menu/pages/TreePage.vue'
 </script>

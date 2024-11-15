@@ -1,23 +1,12 @@
 import { ref, onMounted, nextTick } from 'vue';
 import { useQuasar } from 'quasar';
-import { menuService } from 'src/services/menuServices';
-
-interface TreeNode {
-  path: string;
-  label: string;
-  icon?: string;
-  children?: TreeNode[];
-  tickable?: boolean;
-  selectable?: boolean;
-}
-
-interface Role {
-  codigo: number;
-  nombre: string;
-}
+import type { TreeNode, Role } from '../domain/menu.model';
+import { MenuApi } from '../infrastructure/menu.api';
 
 export function useTreeLogic() {
   const $q = useQuasar();
+  const menuRepository = new MenuApi();
+  
   const treeData = ref<TreeNode[]>([]);
   const selectedItems = ref<string[]>([]);
   const expandedNodes = ref<string[]>([]);
@@ -37,9 +26,13 @@ export function useTreeLogic() {
 
   const loadTreeData = async () => {
     try {
-      const response = await menuService.getMenuItems();
-      console.log('Raw tree data:', response);
-      treeData.value = processNodes(response);
+      const response = await menuRepository.getMenuItems();
+      //console.log('Raw tree data:', response);
+      
+      // Parse the JSON string if response is a string
+      const parsedData = typeof response === 'string' ? JSON.parse(response) : response;
+      treeData.value = processNodes(parsedData);
+      
       console.log('Processed tree data:', treeData.value);
       
       expandAllNodes(treeData.value);
@@ -105,7 +98,6 @@ export function useTreeLogic() {
     const previousSelection = new Set(selectedItems.value);
     const currentSelection = new Set(ticked);
     
-    // Find which node was changed
     let changedPath: string | undefined;
     for (const path of previousSelection) {
       if (!currentSelection.has(path)) {
@@ -128,35 +120,26 @@ export function useTreeLogic() {
         const wasUnchecked = !currentSelection.has(changedPath);
         
         if (wasUnchecked) {
-          // Get all descendant paths
           const descendantPaths = getAllDescendantPaths(node);
-          
-          // Remove the node and all its descendants from selection
           selectedItems.value = selectedItems.value.filter(path => 
             !descendantPaths.includes(path) && path !== changedPath
           );
         } else {
-          // When checking a node, get all parent paths
           const parentPaths = getAllParentPaths(treeData.value, changedPath);
-          
-          // Combine current selection with parent paths and new selection
           const newSelection = new Set([
             ...ticked,
             ...parentPaths
           ]);
-          
           selectedItems.value = Array.from(newSelection);
         }
       }
     }
-    
-    console.log('Selection updated:', selectedItems.value);
   };
 
   const loadRoles = async () => {
     loadingRoles.value = true;
     try {
-      roles.value = await menuService.getRoles();
+      roles.value = await menuRepository.getRoles();
     } catch (error) {
       console.error('Error loading roles:', error);
       $q.notify({
@@ -172,8 +155,12 @@ export function useTreeLogic() {
   const onRoleChange = async (roleId: number) => {
     if (!roleId) return;
     try {
-      const response = await menuService.getMenuRol(roleId);
-      selectedItems.value = extractPaths(response);
+      const response = await menuRepository.getMenuRol(roleId);
+      console.log('Menu Rol: ', response);
+      const parsedData = typeof response === 'string' ? JSON.parse(response) : response;
+      console.log('Menu Rol: ', response);
+      treeData.value = processNodes(parsedData);
+      selectedItems.value = extractPaths(parsedData);
     } catch (error) {
       console.error('Error loading role menu:', error);
       $q.notify({
@@ -209,7 +196,6 @@ export function useTreeLogic() {
           children: []
         };
         
-        // Find and add selected children
         if (node.children) {
           nodeWithChildren.children = node.children
             .filter(child => selectedItems.value.includes(child.path))
@@ -237,7 +223,7 @@ export function useTreeLogic() {
     return selectedNodes;
   };
 
-  const saveSelection = async (): Promise<void> => {
+  const saveSelection = async () => {
     if (!selectedRole.value) {
       $q.notify({
         type: 'warning',
@@ -250,8 +236,7 @@ export function useTreeLogic() {
     saving.value = true;
     try {
       const selectedTree = getSelectedNodesData();
-      console.log('Saving selection tree:', selectedTree);
-      const resp = await menuService.saveMenuRol(selectedRole.value, selectedTree);
+      await menuRepository.saveMenuRol(selectedRole.value, selectedTree);
       
       $q.notify({
         type: 'positive',

@@ -145,7 +145,7 @@ const deleteMenuItem = (item: MenuNode, parentNode: MenuNode | null = null) => {
 
 const saveChanges = async () => {
   try {
-    await menuService.saveMenuItems(menuItems.value)
+    await menuService.saveMenuRol(-1,menuItems.value)
     $q.notify({
       color: 'positive',
       message: 'Talla guardada exitosamente',
@@ -384,8 +384,7 @@ const updateExpanded = (path: string, isExpanded: boolean) => {
 
 <style scoped>
 .menu-container {
-  max-width: 500px;
-  margin: 0 auto;
+  max-width: 700px;
 }
 
 .menu-item {

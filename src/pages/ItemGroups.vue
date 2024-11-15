@@ -1,5 +1,6 @@
 <template>
-  <q-page padding>
+  <div class="q-pa-md menu-container">
+  <q-page>
     <div class="q-pa-md">
       <TableToolbar
         @register="openForm"
@@ -98,6 +99,7 @@
       </q-table>
     </div>
   </q-page>
+</div>
 </template>
 
 <script setup lang="ts">
@@ -278,3 +280,23 @@ onMounted(() => {
   loadItemGroups();
 });
 </script>
+
+
+<style lang="scss" scoped>
+
+.menu-container {
+  max-width: 700px;
+}
+.color-preview {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.body--dark {
+  .color-preview {
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+}
+</style>

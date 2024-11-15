@@ -1,5 +1,6 @@
 <template>
-  <q-page padding>
+  <div class="q-pa-md menu-container">
+  <q-page>
     <div class="q-pa-md">
       <TableToolbar
         @register="openForm"
@@ -111,6 +112,7 @@
       </q-table>
     </div>
   </q-page>
+</div>
 </template>
 
 <script setup lang="ts">
@@ -295,6 +297,10 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+
+.menu-container {
+  max-width: 700px;
+}
 .color-preview {
   width: 24px;
   height: 24px;

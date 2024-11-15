@@ -1,5 +1,6 @@
 <template>
-  <q-page padding>
+  <div class="q-pa-md menu-container">
+  <q-page>
     <div class="q-pa-md">
       <TableToolbar
         @register="openForm"
@@ -11,7 +12,7 @@
       <q-dialog v-model="showForm" persistent>
         <q-card style="min-width: 350px">
           <q-card-section class="row items-center">
-            <div class="text-h6">{{ editMode ? t('colors.editColor') : t('colors.newColor') }}</div>
+            <div class="text-h6">{{ editMode ? t('colors.editColor') : t('Nuevo Color') }}</div>
             <q-space />
             <q-btn icon="close" flat round dense v-close-popup />
           </q-card-section>
@@ -111,6 +112,7 @@
       </q-table>
     </div>
   </q-page>
+</div>
 </template>
 
 <script setup lang="ts">
@@ -295,6 +297,10 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+
+.menu-container {
+  max-width: 700px;
+}
 .color-preview {
   width: 24px;
   height: 24px;

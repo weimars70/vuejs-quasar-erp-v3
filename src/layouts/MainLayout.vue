@@ -310,6 +310,7 @@ const openInTab = (node: MenuNode) => {
 
   onMounted(async () => {
     menuItems.value = await menuService.getMenuItems();
+    console.log('menuItems.value :::', menuItems.value );
     setTheme(themes[0]);
     if (!auth.isAuthenticated) {
       router.push('/login');

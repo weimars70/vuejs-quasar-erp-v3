@@ -243,7 +243,8 @@ const menuItems = [
   { path: '/item-groups', label: 'Grupos', icon: 'category' },
   { path: '/purchases', label: 'Compras', icon: 'shopping_cart' },
   { path: '/roles', label: 'Roles', icon: 'admin_panel_settings' },
-  { path: '/permisos', label: 'Permisos', icon: 'admin_panel_settings' }
+  { path: '/permisos', label: 'Permisos', icon: 'admin_panel_settings' },
+  { path: '/usuarios', label: 'Usuarios', icon: 'users' }
 ];
 
 [{"path":"/inicio","label":"Inicio","icon":"home","children":[]},{"path":"/colors","label":"Colores","icon":"palette","children":[]},{"path":"/sizes","label":"Tallas","icon":"straighten","children":[]},{"path":"/item-groups","label":"Grupos","icon":"category","children":[]},{"path":"/purchases","label":"Compras","icon":"shopping_cart","children":[{"path":"/nueva-compra","label":"Nueva Compra","icon":"shopping_cart","children":[]}]},{"path":"/roles","label":"Roles","icon":"admin_panel_settings","children":[{"path":"/nuevo-rol","label":"Nuevo Rol","icon":"account_circle","children":[]}]},{"path":"/permisos","label":"Permisos","icon":"admin_panel_settings","children":[]}]

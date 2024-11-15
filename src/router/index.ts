@@ -49,6 +49,7 @@ function getIconForRoute(path: string): string {
     '/purchases': 'shopping_cart',
     '/roles': 'admin_panel_settings',
     '/permisos': 'shopping_cart',
+    '/usuarios': 'users',
   };
   
   return icons[path] || 'help';

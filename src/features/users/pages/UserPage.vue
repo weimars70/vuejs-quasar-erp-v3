@@ -5,19 +5,20 @@
       :loading="loading"
       @add="openCreateDialog()"
       @edit="openEditDialog($event)"
+      @filter-change="handleFilterChange"
     />
 
     <UserForm
       v-model="showCreateDialog"
       :loading="saving"
-      @submit="saveUser"
+      @submit="createUser"
     />
 
     <EditUserForm
       v-model="showEditDialog"
       :user="editingUser"
       :loading="saving"
-      @submit="saveUser"
+      @submit="updateUser"
     />
   </q-page>
 </template>
@@ -40,11 +41,12 @@ const saving = ref(false);
 const showCreateDialog = ref(false);
 const showEditDialog = ref(false);
 const editingUser = ref<User | null>(null);
+const currentFilters = ref<Record<string, string>>({});
 
 const loadUsers = async () => {
   loading.value = true;
   try {
-    users.value = await userRepository.getUsers();
+    users.value = await userRepository.getUsers(currentFilters.value);
   } catch (error) {
     console.error('Error loading users:', error);
     $q.notify({
@@ -57,6 +59,11 @@ const loadUsers = async () => {
   }
 };
 
+const handleFilterChange = async (filters: Record<string, string>) => {
+  currentFilters.value = filters;
+  await loadUsers();
+};
+
 const openCreateDialog = () => {
   showCreateDialog.value = true;
 };
@@ -66,33 +73,61 @@ const openEditDialog = (user: User) => {
   showEditDialog.value = true;
 };
 
-const saveUser = async (formData: Partial<User>) => {
+const createUser = async (formData: Partial<User>) => {
   saving.value = true;
   try {
-    if (editingUser.value) {
-      await userRepository.updateUser({
-        ...editingUser.value,
-        ...formData
-      });
-    } else {
-      await userRepository.createUser(formData as Omit<User, 'id'>);
-    }
-
+    await userRepository.createUser(formData as Omit<User, 'id'>);
+    
     $q.notify({
       type: 'positive',
-      message: `Usuario ${editingUser.value ? 'actualizado' : 'creado'} exitosamente`,
+      message: 'Usuario creado exitosamente',
       position: 'center'
     });
 
     showCreateDialog.value = false;
-    showEditDialog.value = false;
-    editingUser.value = null;
-    loadUsers();
+    await loadUsers();
   } catch (error) {
-    console.error('Error saving user:', error);
+    console.error('Error creating user:', error);
     $q.notify({
       type: 'negative',
-      message: `Error al ${editingUser.value ? 'actualizar' : 'crear'} usuario`,
+      message: 'Error al crear usuario',
+      position: 'center'
+    });
+  } finally {
+    saving.value = false;
+  }
+};
+
+const updateUser = async (formData: Partial<User>) => {
+  if (!editingUser.value?.id) return;
+  
+  saving.value = true;
+  try {
+    const updateDto = {
+      nombre: formData.nombre,
+      email: formData.email,
+      rol: formData.rol
+    };
+
+    await userRepository.updateUser({
+      id: editingUser.value.id,
+      ...updateDto
+    });
+    
+    $q.notify({
+      type: 'positive',
+      message: 'Usuario actualizado exitosamente',
+      position: 'center'
+    });
+
+    showEditDialog.value = false;
+    editingUser.value = null;
+    await loadUsers();
+  } catch (error) {
+    console.error('Error updating user:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'Error al actualizar usuario',
       position: 'center'
     });
   } finally {

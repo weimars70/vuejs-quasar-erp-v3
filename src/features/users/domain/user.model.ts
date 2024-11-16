@@ -6,3 +6,10 @@ export interface User {
   rol?: number;
   rol_nombre?: string;
 }
+
+export interface UserUpdate {
+  id?: number;
+  nombre: string;
+  email: string;
+  rol?: number;
+}
